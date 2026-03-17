@@ -1,0 +1,106 @@
+version: "3.9"
+
+services:
+  mycodex-server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.server
+    container_name: mycodex-server
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      GITEA_CLIENT_ID: ${GITEA_CLIENT_ID}
+      GITEA_CLIENT_SECRET: ${GITEA_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
+      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:-}
+      GITEA_URL: http://gitea:3000
+      GITEA_REDIRECT_URI: http://localhost/api/auth/gitea/callback
+      GOOGLE_REDIRECT_URI: http://localhost/api/auth/google/callback
+      DB_PATH: /data/db/mycodex.db
+      DATA_PATH: /data/mycodex
+    ports:
+      - "127.0.0.1:3210:3210"
+    volumes:
+      - mycodex-data:/data/mycodex
+      - mycodex-db:/data/db
+    networks:
+      - mycodex-net
+    depends_on:
+      gitea:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mycodex-web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+    container_name: mycodex-web
+    ports:
+      - "3211:3211"
+    networks:
+      - mycodex-net
+    restart: unless-stopped
+
+  gitea:
+    image: gitea/gitea:1.22
+    container_name: gitea
+    environment:
+      USER_UID: "1000"
+      USER_GID: "1000"
+      GITEA__server__ROOT_URL: http://localhost/gitea/
+      GITEA__server__HTTP_PORT: "3000"
+    ports:
+      - "127.0.0.1:3000:3000"
+      - "2222:22"
+    volumes:
+      - gitea-data:/data
+    networks:
+      - mycodex-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/version"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: nginx
+    depends_on:
+      - mycodex-server
+      - mycodex-web
+      - gitea
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # SSL 证书目录预留（Let's Encrypt）
+      # - ./certs:/etc/nginx/certs:ro
+    networks:
+      - mycodex-net
+    restart: unless-stopped
+
+  clash:
+    image: dreamacro/clash-premium
+    container_name: clash
+    profiles:
+      - proxy
+    ports:
+      - "7890:7890"
+      - "9090:9090"
+    volumes:
+      - ./clash:/root/.config/clash
+    networks:
+      - mycodex-net
+    restart: unless-stopped
+
+volumes:
+  mycodex-data:
+  mycodex-db:
+  gitea-data:
+
+networks:
+  mycodex-net:
+    driver: bridge

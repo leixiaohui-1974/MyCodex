@@ -1,0 +1,29 @@
+{
+  "name": "mycodex-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MyCodex desktop workspace for writing, research, and coding with embedded agent teams.",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev:web": "powershell -ExecutionPolicy Bypass -File \"%INIT_CWD%\\scripts\\dev-web.ps1\"",
+    "dev:electron": "powershell -ExecutionPolicy Bypass -File \"%INIT_CWD%\\scripts\\dev-electron.ps1\"",
+    "dev": "powershell -ExecutionPolicy Bypass -File \"%INIT_CWD%\\scripts\\dev.ps1\"",
+    "build:web": "powershell -ExecutionPolicy Bypass -File \"%INIT_CWD%\\scripts\\build-web.ps1\"",
+    "start": "powershell -ExecutionPolicy Bypass -File \"%INIT_CWD%\\scripts\\start.ps1\"",
+    "smoke": "node scripts/smoke.js"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "concurrently": "^9.0.1",
+    "electron": "^33.0.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.8",
+    "wait-on": "^8.0.1"
+  }
+}

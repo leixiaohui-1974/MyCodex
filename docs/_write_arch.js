@@ -1,0 +1,1 @@
+const fs=require("fs"); const content=fs.readFileSync("Y:/MyCodex/docs/_arch_content.txt","utf8"); fs.writeFileSync("Y:/MyCodex/docs/hydrosis-architecture.md", content); console.log("OK", content.length);

@@ -1,0 +1,41 @@
+# 依赖
+node_modules
+server/node_modules
+
+# 环境变量
+.env
+.env.*
+
+# 版本控制
+.git
+.gitignore
+
+# 三方引擎缓存
+.three_engine
+
+# 内容目录（不打包进镜像）
+reviews/
+docs/
+
+# Markdown 文档（保留 README.md）
+*.md
+!README.md
+
+# 桌面端（Docker 部署不需要）
+electron/
+
+# 构建脚本（容器内不使用）
+scripts/
+
+# 临时团队文件
+.team_*
+
+# 本地调试产物
+_report_part1.txt
+_test.txt
+_tmp_writer.js
+_wr.js
+_write_review.js
+
+# 构建输出
+dist/

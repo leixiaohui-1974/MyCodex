@@ -1,0 +1,28 @@
+node_modules/
+dist/
+.env
+.env.*
+*.log
+
+# Electron
+electron/reviews/
+
+# Temp files
+_tmp_*
+_report_*
+_test*
+_wr.js
+_write_review.js
+.team_*_last.txt
+.team_*_prompt.md
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Three engine state
+.three_engine/
+
+# npm
+package-lock.json
+server/package-lock.json
