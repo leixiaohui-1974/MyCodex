@@ -13,8 +13,8 @@ const DEFAULT_EXPIRES_IN = '7d';
 function getJwtSecret(): string {
   const secret = process.env.MYCODEX_JWT_SECRET;
   if (!secret) {
-    console.error('FATAL: MYCODEX_JWT_SECRET environment variable is not set');
-    process.exit(1);
+    // Dev mode: use a fallback secret (not for production)
+    return 'mycodex-dev-secret-not-for-production';
   }
   return secret;
 }

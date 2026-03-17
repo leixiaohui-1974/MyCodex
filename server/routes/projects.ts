@@ -48,4 +48,18 @@ export default async function projectsRoutes(fastify: FastifyInstance) {
     if (!result.ok) return reply.code(404).send(result);
     return result;
   });
+
+  // Compat route: PUT /projects/manifest with { projectPath, manifest } body
+  fastify.put('/projects/manifest', { preHandler: [authGuard] }, async (request, reply) => {
+    const { projectPath, manifest } = request.body as { projectPath?: string; manifest?: Record<string, unknown> };
+    if (!projectPath || !manifest) {
+      return reply.code(400).send({ ok: false, error: 'projectPath and manifest are required' });
+    }
+    if (!isPathWithinRoots(projectPath, getAllowedRoots())) {
+      return reply.code(403).send({ ok: false, error: 'Path not allowed' });
+    }
+    const result = updateManifest(projectPath, manifest);
+    if (!result.ok) return reply.code(404).send(result);
+    return result;
+  });
 }

@@ -58,18 +58,18 @@ export class HttpTransport implements MyCodexTransport {
   }
 
   listProjects(root: string): Promise<{ ok: boolean; root: string; projects: MycodexProject[] }> {
-    return this.request("/api/projects", { query: { root } });
+    return this.request("/api/v1/projects", { query: { root } });
   }
 
   createProject(root: string, name: string): Promise<{ ok: boolean; project: MycodexProject; error?: string }> {
-    return this.request("/api/projects", { method: "POST", body: { root, name } });
+    return this.request("/api/v1/projects", { method: "POST", body: { root, name } });
   }
 
   updateProjectManifest(
     projectPath: string,
     manifest: MycodexProjectManifest
   ): Promise<{ ok: boolean; project: MycodexProject; error?: string }> {
-    return this.request("/api/projects/manifest", { method: "PUT", body: { projectPath, manifest } });
+    return this.request("/api/v1/projects/manifest", { method: "PUT", body: { projectPath, manifest } });
   }
 
   runTeam(payload: {
@@ -87,23 +87,23 @@ export class HttpTransport implements MyCodexTransport {
     maxWorkers?: number;
     noAutoMerge?: boolean;
   }): Promise<MycodexCommandResult> {
-    return this.request("/api/team/run", { method: "POST", body: payload });
+    return this.request("/api/v1/team/run", { method: "POST", body: payload });
   }
 
   runGws(payload: { commandLine: string; cwd?: string }): Promise<MycodexCommandResult> {
-    return this.request("/api/gws/run", { method: "POST", body: payload });
+    return this.request("/api/v1/gws/run", { method: "POST", body: payload });
   }
 
   runLzc(payload: { commandLine: string; cwd?: string }): Promise<MycodexCommandResult> {
-    return this.request("/api/lzc/run", { method: "POST", body: payload });
+    return this.request("/api/v1/lzc/run", { method: "POST", body: payload });
   }
 
   deployGitea(payload: { cwd?: string; appName?: string; image?: string }): Promise<MycodexCommandResult> {
-    return this.request("/api/gitea/deploy", { method: "POST", body: payload });
+    return this.request("/api/v1/gitea/deploy", { method: "POST", body: payload });
   }
 
   initGitTeamFlow(payload: { projectPath: string }): Promise<MycodexCommandResult> {
-    return this.request("/api/git/team/init", { method: "POST", body: payload });
+    return this.request("/api/v1/git/team/init", { method: "POST", body: payload });
   }
 
   bindGiteaRemote(payload: {
@@ -111,7 +111,7 @@ export class HttpTransport implements MyCodexTransport {
     remoteUrl: string;
     remoteName?: string;
   }): Promise<MycodexCommandResult> {
-    return this.request("/api/git/gitea/bind-remote", { method: "POST", body: payload });
+    return this.request("/api/v1/git/remote/bind", { method: "POST", body: payload });
   }
 
   runGitTeamQuickFlow(payload: {
@@ -122,7 +122,7 @@ export class HttpTransport implements MyCodexTransport {
     branchPrefix?: string;
     remoteName?: string;
   }): Promise<MycodexCommandResult> {
-    return this.request("/api/git/team/quick-flow", { method: "POST", body: payload });
+    return this.request("/api/v1/git/team/quick-flow", { method: "POST", body: payload });
   }
 
   backupGithub(payload: {
@@ -131,31 +131,31 @@ export class HttpTransport implements MyCodexTransport {
     branch?: string;
     remoteName?: string;
   }): Promise<MycodexCommandResult> {
-    return this.request("/api/backup/github", { method: "POST", body: payload });
+    return this.request("/api/v1/backup/github", { method: "POST", body: payload });
   }
 
   runtimeStatus(): Promise<MycodexRuntimeStatus> {
-    return this.request("/api/runtime/status");
+    return this.request("/api/v1/runtime/status");
   }
 
   listArtifacts(projectPath: string): Promise<{ ok: boolean; artifacts: MycodexArtifact[]; error?: string }> {
-    return this.request("/api/artifacts", { query: { projectPath } });
+    return this.request("/api/v1/artifacts", { query: { project: projectPath } });
   }
 
   readArtifact(targetPath: string, projectRoot?: string): Promise<MycodexArtifactContent> {
-    return this.request("/api/artifacts/read", { query: { targetPath, projectRoot } });
+    return this.request("/api/v1/artifacts/content", { query: { path: targetPath, root: projectRoot } });
   }
 
   startGoogleAuth(payload: { url?: string }): Promise<{ ok: boolean; message?: string; error?: string }> {
-    return this.request("/api/auth/google/start", { method: "POST", body: payload });
+    return this.request("/api/v1/auth/google/start", { method: "POST", body: payload });
   }
 
   startWechatAuth(payload: { url?: string }): Promise<{ ok: boolean; message?: string; error?: string }> {
-    return this.request("/api/auth/wechat/start", { method: "POST", body: payload });
+    return this.request("/api/v1/auth/wechat/start", { method: "POST", body: payload });
   }
 
   openFile(targetPath: string): Promise<{ ok: boolean; error?: string }> {
-    return this.request("/api/file/open", { method: "POST", body: { targetPath } });
+    return this.request("/api/v1/file/open", { method: "POST", body: { targetPath } });
   }
 
   onTaskOutput(callback: (data: any) => void): () => void {

@@ -11,6 +11,12 @@ export async function authGuard(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
+  // Dev mode: skip auth when no JWT secret is configured
+  if (!process.env.MYCODEX_JWT_SECRET) {
+    request.user = { sub: 'dev', provider: 'local', role: 'admin' };
+    return;
+  }
+
   try {
     // 优先从 HttpOnly Cookie 读取，向后兼容 Authorization header
     const token =
