@@ -175,8 +175,7 @@ export function readManifest(projectPath: string): Manifest {
   const manifestPath = path.join(projectPath, PROJECT_MANIFEST);
   if (!fs.existsSync(manifestPath)) {
     const manifest = createDefaultManifest(projectName, slugify(projectName));
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "
-", "utf8");
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
     return manifest;
   }
   try {
@@ -204,8 +203,7 @@ export function writeManifest(projectPath: string, manifest: Partial<Manifest>):
   const nextManifest = { ...manifest, updatedAt: nowIso() } as Manifest;
   const targetPath = path.join(projectPath, PROJECT_MANIFEST);
   const tmpPath = targetPath + ".tmp";
-  fs.writeFileSync(tmpPath, JSON.stringify(nextManifest, null, 2) + "
-", "utf8");
+  fs.writeFileSync(tmpPath, JSON.stringify(nextManifest, null, 2) + "\n", "utf8");
   fs.renameSync(tmpPath, targetPath);
   return nextManifest;
 }
@@ -324,8 +322,7 @@ export function runShell(commandLine: string, cwd?: string, timeoutMs?: number):
       clearTimeout(timer);
       const warnings = collectShellWarnings(stdoutTruncated, stderrTruncated);
       if (timedOut) warnings.push("Command timed out after " + (timeout / 1000) + "s");
-      resolve({ code: 1, stdout, stderr: (stderr + "
-" + error.message).trim(), warnings });
+      resolve({ code: 1, stdout, stderr: (stderr + "\n" + error.message).trim(), warnings });
     });
     child.on("close", (code: number | null) => {
       clearTimeout(timer);
@@ -362,8 +359,7 @@ export function runCmd(command: string, args: string[], cwd?: string, timeoutMs?
       clearTimeout(timer);
       const warnings = collectShellWarnings(stdoutTruncated, stderrTruncated);
       if (timedOut) warnings.push("Command timed out after " + (timeout / 1000) + "s");
-      resolve({ code: 1, stdout, stderr: (stderr + "
-" + error.message).trim(), warnings });
+      resolve({ code: 1, stdout, stderr: (stderr + "\n" + error.message).trim(), warnings });
     });
     child.on("close", (code: number | null) => {
       clearTimeout(timer);

@@ -1,0 +1,227 @@
+/* MenuBar 菜单栏样式 */
+.menu-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(135, 154, 181, 0.2);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 2px 8px rgba(30, 44, 67, 0.06);
+}
+
+.menu-bar-logo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #c5542d;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.menu-bar-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.menu-trigger-wrap {
+  position: relative;
+}
+
+.menu-trigger {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #223247;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+  box-shadow: none;
+}
+
+.menu-trigger:hover {
+  background: rgba(37, 77, 122, 0.07);
+  border-color: rgba(37, 77, 122, 0.12);
+  transform: none;
+  box-shadow: none;
+}
+
+.menu-trigger--active {
+  background: rgba(197, 84, 45, 0.08);
+  border-color: rgba(197, 84, 45, 0.25);
+  color: #c5542d;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 320px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(135, 154, 181, 0.28);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(30, 44, 67, 0.14);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 500;
+  backdrop-filter: blur(16px);
+}
+
+.menu-dropdown--right {
+  left: auto;
+  right: 0;
+}
+
+.menu-group-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #526173;
+  margin: 8px 0 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e8edf4;
+}
+
+.menu-group-title:first-child {
+  margin-top: 0;
+}
+
+.menu-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.menu-row--buttons {
+  flex-wrap: wrap;
+}
+
+.menu-input {
+  flex: 1;
+  border: 1px solid #cad5e3;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.84rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: #17202a;
+  width: 100%;
+}
+
+.menu-input:focus {
+  outline: none;
+  border-color: #9ab3ce;
+  box-shadow: 0 0 0 3px rgba(37, 77, 122, 0.1);
+}
+
+.menu-btn {
+  border: 1px solid #b14926;
+  background: linear-gradient(135deg, #c5542d, #9e391f);
+  color: #fffaf6;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.menu-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(165, 71, 34, 0.2);
+}
+
+.menu-btn.ghost {
+  border-color: #cfd8e6;
+  background: #ffffff;
+  color: #223247;
+  box-shadow: none;
+}
+
+.menu-btn.ghost:hover:not(:disabled) {
+  background: #f0f4fa;
+  border-color: #a8bed6;
+  box-shadow: none;
+}
+
+.menu-runtime-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-runtime-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  border: 1px solid #e0e8f0;
+}
+
+.menu-runtime-item--ok {
+  background: #edfaf2;
+  border-color: #b6e8ce;
+  color: #1a5e38;
+}
+
+.menu-runtime-item--miss {
+  background: #fff4f4;
+  border-color: #f0c0c0;
+  color: #8a2020;
+}
+
+.menu-muted {
+  font-size: 0.82rem;
+  color: #5d6c7c;
+  margin: 4px 0;
+}
+
+.menu-bar-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.menu-project-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #415367;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(197, 84, 45, 0.25);
+  border-top-color: #c5542d;
+  border-radius: 50%;
+  animation: menu-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes menu-spin {
+  to { transform: rotate(360deg); }
+}

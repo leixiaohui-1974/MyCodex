@@ -26,36 +26,36 @@ export function RightPane({
   return (
       <aside className="right-pane">
         <div className="preview-head">
-          <h2>Result Preview</h2>
+          <h2>结果预览</h2>
           <div className="tabs">
             <button className={previewTab === "preview" ? "tab active" : "tab"} onClick={() => setPreviewTab("preview")}>
-              Preview
+              预览
             </button>
             <button className={previewTab === "log" ? "tab active" : "tab"} onClick={() => setPreviewTab("log")}>
-              Logs
+              日志
             </button>
             <button
               className={previewTab === "timeline" ? "tab active" : "tab"}
               onClick={() => setPreviewTab("timeline")}
             >
-              Timeline
+              时间线
             </button>
           </div>
         </div>
 
         {previewTab === "timeline" ? (
           <div className="timeline-panel">
-            {timeline.length === 0 ? <p className="empty">No team runs yet.</p> : null}
+            {timeline.length === 0 ? <p className="empty">暂无运行记录。</p> : null}
             {timeline.map((entry) => (
               <article key={entry.id} className="timeline-card">
                 <div className="timeline-head">
                   <strong>{entry.label}</strong>
                   <span className={`timeline-state state-${entry.status}`}>{entry.status}</span>
                 </div>
-                <p>Task: {entry.taskId}</p>
-                <p>Preset: {entry.presetLabel}</p>
-                <p>Start: {formatTime(entry.startTime)}</p>
-                <p>Exit: {entry.exitCode ?? "-"}</p>
+                <p>任务: {entry.taskId}</p>
+                <p>预设: {entry.presetLabel}</p>
+                <p>开始: {formatTime(entry.startTime)}</p>
+                <p>退出码: {entry.exitCode ?? "-"}</p>
               </article>
             ))}
           </div>
@@ -89,15 +89,15 @@ export function RightPane({
                 {preview.artifact?.kind} | {formatSize(preview.artifact?.size)} | {formatTime(preview.artifact?.mtimeMs)}
               </span>
               <div className="row-buttons">
-                <button onClick={() => onOpenPreviewFile()}>Open File</button>
-                {preview.truncated ? <span className="caption">Preview truncated to 128 KB.</span> : null}
+                <button onClick={() => onOpenPreviewFile()}>打开文件</button>
+                {preview.truncated ? <span className="caption">预览已截断至 128 KB。</span> : null}
               </div>
             </div>
             {preview.kind === "html" ? (
               <iframe
                 className="html-preview"
                 srcDoc={preview.content}
-                title={preview.artifact?.name || "preview"}
+                title={preview.artifact?.name || "预览"}
                 sandbox=""
               />
             ) : preview.kind === "markdown" ? (
@@ -113,9 +113,9 @@ export function RightPane({
           </div>
         ) : (
           <div className="empty-preview">
-            <p>{preview?.error || "No preview available. Run a task or scan project artifacts."}</p>
+            <p>{preview?.error || "暂无预览内容。运行任务或扫描项目产物。"}</p>
             <button onClick={() => onRefreshPreview()} disabled={!activeProjectPath}>
-              Refresh Preview
+              刷新预览
             </button>
           </div>
         )}

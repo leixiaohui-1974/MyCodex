@@ -4,6 +4,7 @@ const { spawn } = require("child_process");
 
 const PROJECT_MANIFEST = "mycodex.project.json";
 const OUTPUT_LIMIT_BYTES = 512 * 1024;
+const OUTPUT_BUFFER_LIMIT = OUTPUT_LIMIT_BYTES;
 const SHELL_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes max per command
 const PREVIEW_EXTENSIONS = new Map([
   [".md", "markdown"],

@@ -24,9 +24,9 @@ import {
   formatJson,
   withLineNumbers,
 } from "./utils";
-import { LeftPane } from "./components/LeftPane";
-import { CenterPane } from "./components/CenterPane";
-import { RightPane } from "./components/RightPane";
+import { MenuBar } from "./components/MenuBar";
+import { Sidebar } from "./components/Sidebar";
+import { MainContent } from "./components/MainContent";
 
 export default function App() {
   const transport = useTransport();
@@ -35,11 +35,12 @@ export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectPath, setActiveProjectPath] = useState<string>("");
   const [newProjectName, setNewProjectName] = useState("");
-  const [logs, setLogs] = useState("No logs yet.");
+  const [logs, setLogs] = useState("暂无日志。");
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [selectedArtifactPath, setSelectedArtifactPath] = useState("");
   const [preview, setPreview] = useState<ArtifactContent | null>(null);
-  const [previewTab, setPreviewTab] = useState<"preview" | "log" | "timeline">("preview");
+  const [previewTab, setPreviewTab] = useState<"preview" | "log" | "timeline" | "artifacts">("preview");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [mergePreview, setMergePreview] = useState<MergePreview | null>(null);
   const [isBusy, setIsBusy] = useState(false);
@@ -112,7 +113,7 @@ export default function App() {
   async function refreshProjects(nextRoot = projectsRoot) {
     const res = (await transport.listProjects(nextRoot)) as ProjectListResponse;
     if (!res.ok) {
-      showError("Failed to load project list.");
+      showError("加载项目列表失败。");
       return;
     }
     setProjectsRoot(res.root);
@@ -135,7 +136,7 @@ export default function App() {
     }
     const res = await transport.listArtifacts(projectPath);
     if (!res.ok) {
-      showError(`Artifact scan failed: ${res.error ?? "unknown error"}`);
+      showError(`产物扫描失败: ${res.error ?? "未知错误"}`);
       setArtifacts([]);
       setPreview(null);
       setMergePreview(null);
@@ -202,7 +203,7 @@ export default function App() {
     if (!newProjectName.trim()) return;
     const res = (await transport.createProject(projectsRoot, newProjectName)) as ProjectMutationResponse;
     if (!res.ok) {
-      showError(`Project creation failed: ${res.error ?? "unknown error"}`);
+      showError(`项目创建失败: ${res.error ?? "未知错误"}`);
       return;
     }
     setNewProjectName("");
@@ -231,7 +232,7 @@ export default function App() {
     };
     const res = (await transport.updateProjectManifest(activeProject.path, manifest)) as ProjectMutationResponse;
     if (!res.ok) {
-      showError(`Settings save failed: ${res.error ?? "unknown error"}`);
+      showError(`设置保存失败: ${res.error ?? "未知错误"}`);
       return;
     }
     setProjects((prev) => prev.map((project) => (project.path === res.project.path ? res.project : project)));
@@ -308,7 +309,7 @@ export default function App() {
       return res;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      appendLog(`[${label}] unexpected error: ${message}`);
+      appendLog(`[${label}] 意外错误: ${message}`);
       setTimeline((prev) =>
         prev.map((entry) =>
           entry.id === runId
@@ -335,7 +336,7 @@ export default function App() {
     const currentPreset = TEAM_PRESETS.find((preset) => preset.id === selectedPresetId);
     const projectPath = activeProject?.path || projectsRoot || runtimeStatus?.defaultProjectsRoot || "";
     if (!projectPath) {
-      appendLog("[team] missing project path. Wait for runtime status or select a project.");
+      appendLog("[team] 缺少项目路径。请等待运行环境检测或选择一个项目。");
       return;
     }
     await saveProjectSettings();
@@ -366,7 +367,7 @@ export default function App() {
   async function runGws() {
     const projectPath = activeProject?.path || projectsRoot || runtimeStatus?.defaultProjectsRoot || "";
     if (!projectPath) {
-      appendLog("[gws] missing project path. Wait for runtime status or select a project.");
+      appendLog("[gws] 缺少项目路径。请等待运行环境检测或选择一个项目。");
       return;
     }
     await executeAndCapture(
@@ -383,7 +384,7 @@ export default function App() {
   async function runLzc() {
     const projectPath = activeProject?.path || projectsRoot || runtimeStatus?.defaultProjectsRoot || "";
     if (!projectPath) {
-      appendLog("[lzc] missing project path. Wait for runtime status or select a project.");
+      appendLog("[lzc] 缺少项目路径。请等待运行环境检测或选择一个项目。");
       return;
     }
     await executeAndCapture(
@@ -400,7 +401,7 @@ export default function App() {
   async function deployGiteaByLzc() {
     const projectPath = activeProject?.path || projectsRoot || runtimeStatus?.defaultProjectsRoot || "";
     if (!projectPath) {
-      appendLog("[gitea] missing project path. Wait for runtime status or select a project.");
+      appendLog("[gitea] 缺少项目路径。请等待运行环境检测或选择一个项目。");
       return;
     }
     await executeAndCapture(
@@ -538,93 +539,99 @@ export default function App() {
 
 
   return (
-    <div className="app-shell">
+    <div className="app-shell-v2">
+      <MenuBar
+        gwsCommand={gwsCommand}
+        setGwsCommand={setGwsCommand}
+        onRunGws={() => void runGws()}
+        lzcCommand={lzcCommand}
+        setLzcCommand={setLzcCommand}
+        giteaAppName={giteaAppName}
+        setGiteaAppName={setGiteaAppName}
+        giteaBaseUrl={giteaBaseUrl}
+        setGiteaBaseUrl={setGiteaBaseUrl}
+        onRunLzc={() => void runLzc()}
+        onDeployGitea={() => void deployGiteaByLzc()}
+        giteaRepoUrl={giteaRepoUrl}
+        setGiteaRepoUrl={setGiteaRepoUrl}
+        gitTopic={gitTopic}
+        setGitTopic={setGitTopic}
+        gitCommitType={gitCommitType}
+        setGitCommitType={setGitCommitType}
+        gitSummary={gitSummary}
+        setGitSummary={setGitSummary}
+        backupMessage={backupMessage}
+        setBackupMessage={setBackupMessage}
+        onInitGit={() => void initGitTeamCollaboration()}
+        onBindRemote={() => void bindGiteaRemote()}
+        onQuickFlow={() => void runGitQuickFlow()}
+        onBackup={() => void runBackup()}
+        accountEmailDraft={accountEmailDraft}
+        setAccountEmailDraft={setAccountEmailDraft}
+        wechatIdDraft={wechatIdDraft}
+        setWechatIdDraft={setWechatIdDraft}
+        onGoogleLogin={() => void startGoogleLogin()}
+        onWechatLogin={() => void startWechatLogin()}
+        onBindAccount={() => void bindAccount()}
+        teamId={teamId}
+        setTeamId={setTeamId}
+        taskType={taskType}
+        setTaskType={setTaskType}
+        subtype={subtype}
+        setSubtype={setSubtype}
+        onSaveSettings={() => void saveProjectSettings()}
+        runtimeStatus={runtimeStatus}
+        onRefreshRuntime={() => void refreshRuntimeStatus()}
+        activeProject={activeProject}
+        isBusy={isBusy}
+      />
+      <div className="app-body">
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          projects={projects}
+          activeProject={activeProject}
+          onSelectProject={(path) => setActiveProjectPath(path)}
+          newProjectName={newProjectName}
+          setNewProjectName={setNewProjectName}
+          onCreateProject={() => void createProject()}
+          onRefreshProjects={() => void refreshProjects(projectsRoot)}
+          onOpenFolder={() => activeProject && void transport.openFile(activeProject.path)}
+          projectsRoot={projectsRoot}
+          setProjectsRoot={setProjectsRoot}
+        />
+        <MainContent
+          selectedPresetId={selectedPresetId}
+          task={task}
+          goal={goal}
+          setTask={setTask}
+          setGoal={setGoal}
+          onApplyPreset={(presetId) => applyPreset(presetId)}
+          onRunTeam={(cmd) => void runTeam(cmd)}
+          isBusy={isBusy}
+          activeProject={activeProject}
+          previewTab={previewTab}
+          setPreviewTab={setPreviewTab}
+          timeline={timeline}
+          logs={logs}
+          preview={preview}
+          mergePreview={mergePreview}
+          activeProjectPath={activeProjectPath}
+          onRefreshPreview={() => activeProject && void loadArtifacts(activeProject.path)}
+          onOpenPreviewFile={() => preview?.artifact && void transport.openFile(preview.artifact.path)}
+          artifacts={artifacts}
+          artifactGroups={artifactGroups}
+          selectedArtifactPath={selectedArtifactPath}
+          onScanArtifacts={() => activeProject && void loadArtifacts(activeProject.path)}
+          onOpenArtifact={(path) => void openArtifact(path)}
+          onOpenMergePair={(baseName, pair) => void openMergePair(baseName, pair)}
+        />
+      </div>
       {errorMessage && (
         <div className="error-toast" role="alert" onClick={() => setErrorMessage(null)}>
           {errorMessage}
         </div>
       )}
-      <LeftPane
-        runtimeStatus={runtimeStatus}
-        projectsRoot={projectsRoot}
-        setProjectsRoot={setProjectsRoot}
-        projects={projects}
-        activeProject={activeProject}
-        newProjectName={newProjectName}
-        setNewProjectName={setNewProjectName}
-        artifacts={artifacts}
-        artifactGroups={artifactGroups}
-        selectedArtifactPath={selectedArtifactPath}
-        onRefreshRuntimeStatus={() => void refreshRuntimeStatus()}
-        onRefreshProjects={() => void refreshProjects(projectsRoot)}
-        onOpenFolder={() => activeProject && void transport.openFile(activeProject.path)}
-        onCreateProject={() => void createProject()}
-        onSelectProject={(path) => setActiveProjectPath(path)}
-        onScanArtifacts={() => activeProject && void loadArtifacts(activeProject.path)}
-        onOpenArtifact={(path) => void openArtifact(path)}
-        onOpenMergePair={(baseName, pair) => void openMergePair(baseName, pair)}
-      />
-      <CenterPane
-        activeProject={activeProject}
-        isBusy={isBusy}
-        selectedPresetId={selectedPresetId}
-        teamId={teamId}
-        taskType={taskType}
-        subtype={subtype}
-        task={task}
-        goal={goal}
-        setTeamId={setTeamId}
-        setTaskType={setTaskType}
-        setSubtype={setSubtype}
-        setTask={setTask}
-        setGoal={setGoal}
-        onApplyPreset={(presetId) => applyPreset(presetId)}
-        onRunTeam={(cmd) => void runTeam(cmd)}
-        onSaveProjectSettings={() => void saveProjectSettings()}
-        accountEmailDraft={accountEmailDraft}
-        wechatIdDraft={wechatIdDraft}
-        setAccountEmailDraft={setAccountEmailDraft}
-        setWechatIdDraft={setWechatIdDraft}
-        onStartGoogleLogin={() => void startGoogleLogin()}
-        onStartWechatLogin={() => void startWechatLogin()}
-        onBindAccount={() => void bindAccount()}
-        gwsCommand={gwsCommand}
-        setGwsCommand={setGwsCommand}
-        onRunGws={() => void runGws()}
-        lzcCommand={lzcCommand}
-        giteaAppName={giteaAppName}
-        giteaBaseUrl={giteaBaseUrl}
-        setLzcCommand={setLzcCommand}
-        setGiteaAppName={setGiteaAppName}
-        setGiteaBaseUrl={setGiteaBaseUrl}
-        onRunLzc={() => void runLzc()}
-        onDeployGitea={() => void deployGiteaByLzc()}
-        giteaRepoUrl={giteaRepoUrl}
-        backupMessage={backupMessage}
-        gitTopic={gitTopic}
-        gitCommitType={gitCommitType}
-        gitSummary={gitSummary}
-        setGiteaRepoUrl={setGiteaRepoUrl}
-        setBackupMessage={setBackupMessage}
-        setGitTopic={setGitTopic}
-        setGitCommitType={setGitCommitType}
-        setGitSummary={setGitSummary}
-        onInitGitTeamCollaboration={() => void initGitTeamCollaboration()}
-        onBindGiteaRemote={() => void bindGiteaRemote()}
-        onRunGitQuickFlow={() => void runGitQuickFlow()}
-        onRunBackup={() => void runBackup()}
-      />
-      <RightPane
-        previewTab={previewTab}
-        setPreviewTab={setPreviewTab}
-        timeline={timeline}
-        logs={logs}
-        preview={preview}
-        mergePreview={mergePreview}
-        activeProjectPath={activeProjectPath}
-        onRefreshPreview={() => activeProject && void loadArtifacts(activeProject.path)}
-        onOpenPreviewFile={() => preview?.artifact && void transport.openFile(preview.artifact.path)}
-      />
     </div>
   );
 }

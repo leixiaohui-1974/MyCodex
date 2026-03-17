@@ -29,12 +29,12 @@ async function main() {
       await app.register(staticPlugin, { root: publicPath, prefix: '/' });
     }
   } catch { /* skip */ }
-  await app.register(projectsRoutes);
-  await app.register(teamRoutes);
-  await app.register(gitRoutes);
-  await app.register(artifactRoutes);
-  await app.register(runtimeRoutes);
-  await app.register(authRoutes);
+  await app.register(projectsRoutes, { prefix: '/api/v1' });
+  await app.register(teamRoutes, { prefix: '/api/v1' });
+  await app.register(gitRoutes, { prefix: '/api/v1' });
+  await app.register(artifactRoutes, { prefix: '/api/v1' });
+  await app.register(runtimeRoutes, { prefix: '/api/v1' });
+  await app.register(authRoutes, { prefix: '/api/v1' });
   app.get('/health', async () => ({ ok: true, ts: new Date().toISOString() }));
   try {
     const address = await app.listen({ port: PORT, host: '0.0.0.0' });

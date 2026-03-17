@@ -21,9 +21,7 @@ const COLLAB_MD = [
   "- Agent run summary attached",
   "- Tests or validation logs attached",
   "- Risks and rollback plan documented",
-].join("
-") + "
-";
+].join("\n") + "\n";
 
 export async function initGitTeamFlow(payload: { projectPath: string }) {
   const cwd = payload.projectPath;
@@ -46,9 +44,7 @@ export async function initGitTeamFlow(payload: { projectPath: string }) {
   const gitignorePath = path.join(cwd, ".gitignore");
   if (!fsMod.existsSync(gitignorePath)) {
     fsMod.writeFileSync(gitignorePath,
-      ["node_modules","dist","build",".team_*","*.log",".env",".DS_Store","Thumbs.db"].join("
-") + "
-", "utf8");
+      ["node_modules","dist","build",".team_*","*.log",".env",".DS_Store","Thumbs.db"].join("\n") + "\n", "utf8");
   }
   const docsDir = path.join(cwd, "docs");
   ensureDir(docsDir);
@@ -59,8 +55,7 @@ export async function initGitTeamFlow(payload: { projectPath: string }) {
   const commitRes = await runCmd("git", ["commit", "-m", "chore: initialize team collaboration workflow"], cwd);
   outputs.push({ cmd: "git commit -m chore: initialize team collaboration workflow", ...commitRes });
   const nothingToCommit = commitRes.code !== 0 &&
-    /nothing to commit|working tree clean/iu.test(commitRes.stdout + "
-" + commitRes.stderr);
+    /nothing to commit|working tree clean/iu.test(commitRes.stdout + "\n" + commitRes.stderr);
   if (nothingToCommit) {
     return { ok: true, code: 0, stdout: "Git team collaboration workflow already initialized.",
       stderr: "", warnings: ["Team workflow files already initialized."], status: "initialized",
@@ -91,8 +86,7 @@ export async function bindGiteaRemote(payload: { projectPath: string; remoteUrl:
   if (repoCheck.code !== 0) outputs.push({ cmd: "git init", ...await runCmd("git", ["init"], cwd) });
   const remoteList = await runCmd("git", ["remote"], cwd);
   outputs.push({ cmd: "git remote", ...remoteList });
-  const hasRemote = remoteList.stdout.split(/?
-/).some((l) => l.trim() === remoteName);
+  const hasRemote = remoteList.stdout.split(/\r?\n/).some((l) => l.trim() === remoteName);
   const remoteRes = hasRemote
     ? await runCmd("git", ["remote", "set-url", remoteName, remoteUrl], cwd)
     : await runCmd("git", ["remote", "add", remoteName, remoteUrl], cwd);
@@ -122,8 +116,7 @@ export async function runGitTeamQuickFlow(payload: { projectPath: string; topic?
   if (repoCheck.code !== 0) return { ok: false, code: repoCheck.code, stdout: repoCheck.stdout, stderr: repoCheck.stderr, warnings: ["Not a git repo."], status: "needs_init", steps, artifacts: scanArtifacts(cwd) };
   const remoteCheck = await runCmd("git", ["remote"], cwd);
   steps.push({ cmd: "git remote", ...remoteCheck });
-  if (!remoteCheck.stdout.split(/?
-/).some((l) => l.trim() === remoteName)) return { ok: false, code: 1, stdout: remoteCheck.stdout, stderr: remoteCheck.stderr, warnings: ["Remote not found."], status: "missing_remote", steps, artifacts: scanArtifacts(cwd) };
+  if (!remoteCheck.stdout.split(/\r?\n/).some((l) => l.trim() === remoteName)) return { ok: false, code: 1, stdout: remoteCheck.stdout, stderr: remoteCheck.stderr, warnings: ["Remote not found."], status: "missing_remote", steps, artifacts: scanArtifacts(cwd) };
   const branchCheck = await runCmd("git", ["rev-parse", "--verify", branch], cwd);
   let checkout;
   if (branchCheck.code === 0) { checkout = await runCmd("git", ["checkout", branch], cwd); steps.push({ cmd: "git checkout " + branch, ...checkout }); }
@@ -134,8 +127,7 @@ export async function runGitTeamQuickFlow(payload: { projectPath: string; topic?
   if (addRes.code !== 0) return { ok: false, code: addRes.code, stdout: addRes.stdout, stderr: addRes.stderr, warnings: ["Failed to stage."], status: "add_failed", steps, artifacts: scanArtifacts(cwd) };
   const commitRes = await runCmd("git", ["commit", "-m", commitMessage], cwd);
   steps.push({ cmd: "git commit -m " + commitMessage, ...commitRes });
-  const nothingToCommit = commitRes.code !== 0 && /nothing to commit|working tree clean/iu.test(commitRes.stdout + "
-" + commitRes.stderr);
+  const nothingToCommit = commitRes.code !== 0 && /nothing to commit|working tree clean/iu.test(commitRes.stdout + "\n" + commitRes.stderr);
   if (nothingToCommit) return { ok: true, code: 0, stdout: "No changes.", stderr: commitRes.stderr, warnings: ["Nothing to commit."], status: "nothing_to_commit", steps, artifacts: scanArtifacts(cwd) };
   if (commitRes.code !== 0) return { ok: false, code: commitRes.code, stdout: commitRes.stdout, stderr: commitRes.stderr, warnings: ["Commit failed."], status: "commit_failed", steps, artifacts: scanArtifacts(cwd) };
   const pushRes = await runCmd("git", ["push", "-u", remoteName, branch], cwd);
@@ -153,8 +145,7 @@ export async function runGitBackup(payload: { projectPath: string; message?: str
   const insideRepo = await runCmd("git", ["rev-parse", "--is-inside-work-tree"], cwd);
   if (insideRepo.code !== 0) return { ok: false, code: insideRepo.code, stdout: insideRepo.stdout, stderr: insideRepo.stderr, warnings: ["Not a git repository."], status: "needs_init", artifacts: scanArtifacts(cwd) };
   const remoteCheck = await runCmd("git", ["remote", "-v"], cwd);
-  const remoteNames = remoteCheck.stdout.split(/?
-/).map((l) => l.trim().split(/s+/)[0]).filter(Boolean);
+  const remoteNames = remoteCheck.stdout.split(/\r?\n/).map((l) => l.trim().split(/\s+/)[0]).filter(Boolean);
 
   if (!remoteNames.length) return { ok: false, code: 1, stdout: remoteCheck.stdout, stderr: remoteCheck.stderr, warnings: ["No git remote configured."], status: "missing_remote", artifacts: scanArtifacts(cwd) };
   if (!remoteNames.includes(remoteName)) return { ok: false, code: 1, stdout: remoteCheck.stdout, stderr: remoteCheck.stderr, warnings: ["Remote not configured."], status: "missing_remote", artifacts: scanArtifacts(cwd) };
@@ -169,8 +160,7 @@ export async function runGitBackup(payload: { projectPath: string; message?: str
   if (addResult.code !== 0) return { ok: false, code: addResult.code, stdout: addResult.stdout, stderr: addResult.stderr, warnings, status: "add_failed", steps: outputs, artifacts: scanArtifacts(cwd) };
   const commitResult = await runCmd("git", ["commit", "-m", message], cwd);
   outputs.push({ cmd: "git commit -m " + message, ...commitResult });
-  const nothingToCommit = commitResult.code !== 0 && /nothing to commit|working tree clean/iu.test(commitResult.stdout + "
-" + commitResult.stderr);
+  const nothingToCommit = commitResult.code !== 0 && /nothing to commit|working tree clean/iu.test(commitResult.stdout + "\n" + commitResult.stderr);
   if (nothingToCommit) { warnings.push("Nothing to commit. Skipping push."); return { ok: true, code: 0, stdout: commitResult.stdout, stderr: commitResult.stderr, warnings, status: "nothing_to_commit", steps: outputs, artifacts: scanArtifacts(cwd) }; }
   if (commitResult.code !== 0) return { ok: false, code: commitResult.code, stdout: commitResult.stdout, stderr: commitResult.stderr, warnings, status: "commit_failed", steps: outputs, artifacts: scanArtifacts(cwd) };
   const pushResult = await runCmd("git", ["push", "-u", remoteName, branch], cwd);

@@ -106,14 +106,13 @@ export function CenterPane({
       <main className="center-pane">
         <section className="panel">
           <div className="section-head">
-            <h2>Default Agent Team</h2>
-            <span className="pill">{currentPreset?.label ?? "custom"}</span>
+            <h2>Agent Team</h2>
+            <span className="pill">{currentPreset?.label ?? "自定义"}</span>
           </div>
-          <label>Preset</label>
           <select
             value={selectedPresetId}
             onChange={(e) => {
-              applyPreset(e.target.value);
+              onApplyPreset(e.target.value);
             }}
           >
             {TEAM_PRESETS.map((preset) => (
@@ -122,168 +121,193 @@ export function CenterPane({
               </option>
             ))}
           </select>
-          <p className="caption">{currentPreset?.description}</p>
-          <label>Team ID</label>
-          <input value={teamId} onChange={(e) => setTeamId(e.target.value)} />
-          <div className="field-grid">
-            <div>
-              <label>Task Type</label>
-              <select value={taskType} onChange={(e) => setTaskType(e.target.value as TaskType)}>
-                <option value="coding">coding</option>
-                <option value="research">research</option>
-                <option value="writing">writing</option>
-              </select>
-            </div>
-            <div>
-              <label>Subtype</label>
-              <input value={subtype} onChange={(e) => setSubtype(e.target.value)} />
-            </div>
-          </div>
-          <label>Task</label>
-          <textarea rows={4} value={task} onChange={(e) => setTask(e.target.value)} />
-          <label>Goal</label>
-          <textarea rows={4} value={goal} onChange={(e) => setGoal(e.target.value)} />
           <div className="row-buttons">
-            <button onClick={() => onRunTeam("plan")} disabled={isBusy}>
-              Team Plan
-            </button>
             <button onClick={() => onRunTeam("run")} disabled={isBusy}>
-              Team Run
+              开始执行
+            </button>
+            <button onClick={() => onRunTeam("plan")} disabled={isBusy}>
+              生成计划
             </button>
             <button onClick={() => onRunTeam("resume")} disabled={isBusy}>
-              Resume
+              继续
             </button>
             <button onClick={() => onRunTeam("status")} disabled={isBusy}>
-              Status
-            </button>
-            <button onClick={() => onSaveProjectSettings()} disabled={!activeProject || isBusy}>
-              Save Project Defaults
+              状态
             </button>
           </div>
+
+          <details className="accordion-item">
+            <summary className="accordion-header">
+              <span>任务详情</span>
+              <span className="caption">{task.length > 20 ? task.slice(0, 20) + "…" : task}</span>
+            </summary>
+            <div className="accordion-body">
+              <label>任务描述</label>
+              <textarea rows={3} value={task} onChange={(e) => setTask(e.target.value)} />
+              <label>目标</label>
+              <textarea rows={3} value={goal} onChange={(e) => setGoal(e.target.value)} />
+            </div>
+          </details>
+
+          <details className="accordion-item">
+            <summary className="accordion-header">
+              <span>高级设置</span>
+              <span className="pill">{taskType}</span>
+            </summary>
+            <div className="accordion-body">
+              <label>Team ID</label>
+              <input value={teamId} onChange={(e) => setTeamId(e.target.value)} />
+              <div className="field-grid">
+                <div>
+                  <label>任务类型</label>
+                  <select value={taskType} onChange={(e) => setTaskType(e.target.value as TaskType)}>
+                    <option value="coding">编码开发</option>
+                    <option value="research">文献调研</option>
+                    <option value="writing">文档写作</option>
+                  </select>
+                </div>
+                <div>
+                  <label>子类型</label>
+                  <input value={subtype} onChange={(e) => setSubtype(e.target.value)} />
+                </div>
+              </div>
+              <button onClick={() => onSaveProjectSettings()} disabled={!activeProject || isBusy}>
+                保存项目默认值
+              </button>
+            </div>
+          </details>
         </section>
 
-        <section className="panel split-panel">
-          <div className="subpanel">
-            <div className="section-head">
+        <section className="panel accordion-panel">
+          <details className="accordion-item">
+            <summary className="accordion-header">
               <h2>账号登录</h2>
               <span className={`pill state-${activeProject?.manifest.authStatus ?? "not_started"}`}>
-                {activeProject?.manifest.authStatus ?? "not_started"}
+                {activeProject?.manifest.authStatus ?? "未开始"}
               </span>
+            </summary>
+            <div className="accordion-body">
+              <label>Gmail 账号</label>
+              <input
+                value={accountEmailDraft}
+                placeholder="name@gmail.com"
+                onChange={(e) => setAccountEmailDraft(e.target.value)}
+              />
+              <label>微信 ID（团队同步用）</label>
+              <input
+                value={wechatIdDraft}
+                placeholder="微信 ID"
+                onChange={(e) => setWechatIdDraft(e.target.value)}
+              />
+              <div className="row-buttons">
+                <button onClick={() => onStartGoogleLogin()} disabled={!activeProject || isBusy}>
+                  Google 登录
+                </button>
+                <button onClick={() => onStartWechatLogin()} disabled={!activeProject || isBusy}>
+                  微信登录
+                </button>
+                <button onClick={() => onBindAccount()} disabled={!activeProject || isBusy}>
+                  绑定账号
+                </button>
+              </div>
+              <p className="caption">MVP 版本将 Gmail/微信 ID 存储在项目元数据中，用于本地团队同步映射。</p>
             </div>
-            <label>Gmail account</label>
-            <input
-              value={accountEmailDraft}
-              placeholder="name@gmail.com"
-              onChange={(e) => setAccountEmailDraft(e.target.value)}
-            />
-            <label>Wechat ID (for team sync)</label>
-            <input
-              value={wechatIdDraft}
-              placeholder="wechat id"
-              onChange={(e) => setWechatIdDraft(e.target.value)}
-            />
-            <div className="row-buttons">
-              <button onClick={() => onStartGoogleLogin()} disabled={!activeProject || isBusy}>
-                Open Google Login
-              </button>
-              <button onClick={() => onStartWechatLogin()} disabled={!activeProject || isBusy}>
-                Open WeChat Login
-              </button>
-              <button onClick={() => onBindAccount()} disabled={!activeProject || isBusy}>
-                Bind Account IDs
-              </button>
-            </div>
-            <p className="caption">MVP stores Gmail/WeChat IDs in project metadata for local-team sync mapping.</p>
-          </div>
+          </details>
 
-          <div className="subpanel">
-            <div className="section-head">
-              <h2>GWS CLI</h2>
+          <details className="accordion-item">
+            <summary className="accordion-header">
+              <h2>GWS 命令行</h2>
               <span className="pill">CLI</span>
+            </summary>
+            <div className="accordion-body">
+              <label>命令</label>
+              <input value={gwsCommand} onChange={(e) => setGwsCommand(e.target.value)} />
+              <div className="row-buttons">
+                <button onClick={() => onRunGws()} disabled={isBusy}>
+                  运行 GWS
+                </button>
+                <button onClick={() => setGwsCommand("gws auth login")} disabled={isBusy}>
+                  认证登录
+                </button>
+                <button onClick={() => setGwsCommand("gws --help")} disabled={isBusy}>
+                  帮助
+                </button>
+              </div>
             </div>
-            <label>Command</label>
-            <input value={gwsCommand} onChange={(e) => setGwsCommand(e.target.value)} />
-            <div className="row-buttons">
-              <button onClick={() => onRunGws()} disabled={isBusy}>
-                Run GWS
-              </button>
-              <button onClick={() => setGwsCommand("gws auth login")} disabled={isBusy}>
-                Auth Login
-              </button>
-              <button onClick={() => setGwsCommand("gws --help")} disabled={isBusy}>
-                Help
-              </button>
-            </div>
-          </div>
+          </details>
 
-          <div className="subpanel">
-            <div className="section-head">
+          <details className="accordion-item">
+            <summary className="accordion-header">
               <h2>LZC + Gitea</h2>
-              <span className="pill">private</span>
+              <span className="pill">私有部署</span>
+            </summary>
+            <div className="accordion-body">
+              <label>LZC 命令</label>
+              <input value={lzcCommand} onChange={(e) => setLzcCommand(e.target.value)} />
+              <label>Gitea 应用名</label>
+              <input value={giteaAppName} onChange={(e) => setGiteaAppName(e.target.value)} />
+              <label>Gitea 地址</label>
+              <input
+                value={giteaBaseUrl}
+                placeholder="https://your-gitea.local"
+                onChange={(e) => setGiteaBaseUrl(e.target.value)}
+              />
+              <div className="row-buttons">
+                <button onClick={() => onRunLzc()} disabled={isBusy}>
+                  运行 LZC
+                </button>
+                <button onClick={() => onDeployGitea()} disabled={isBusy}>
+                  部署 Gitea
+                </button>
+              </div>
             </div>
-            <label>lzc command</label>
-            <input value={lzcCommand} onChange={(e) => setLzcCommand(e.target.value)} />
-            <label>Gitea app name</label>
-            <input value={giteaAppName} onChange={(e) => setGiteaAppName(e.target.value)} />
-            <label>Gitea base URL</label>
-            <input
-              value={giteaBaseUrl}
-              placeholder="https://your-gitea.local"
-              onChange={(e) => setGiteaBaseUrl(e.target.value)}
-            />
-            <div className="row-buttons">
-              <button onClick={() => onRunLzc()} disabled={isBusy}>
-                Run LZC
-              </button>
-              <button onClick={() => onDeployGitea()} disabled={isBusy}>
-                Deploy Gitea
-              </button>
-            </div>
-          </div>
+          </details>
 
-          <div className="subpanel">
-            <div className="section-head">
+          <details className="accordion-item">
+            <summary className="accordion-header">
               <h2>Git 协作与备份</h2>
               <span className="pill">git</span>
+            </summary>
+            <div className="accordion-body">
+              <label>Gitea 仓库地址</label>
+              <input
+                value={giteaRepoUrl}
+                placeholder="https://gitea.example.com/team/mycodex.git"
+                onChange={(e) => setGiteaRepoUrl(e.target.value)}
+              />
+              <label>提交信息</label>
+              <input value={backupMessage} onChange={(e) => setBackupMessage(e.target.value)} />
+              <label>分支主题</label>
+              <input value={gitTopic} onChange={(e) => setGitTopic(e.target.value)} />
+              <label>提交类型</label>
+              <select value={gitCommitType} onChange={(e) => setGitCommitType(e.target.value)}>
+                <option value="feat">feat (新功能)</option>
+                <option value="fix">fix (修复)</option>
+                <option value="docs">docs (文档)</option>
+                <option value="research">research (调研)</option>
+                <option value="chore">chore (维护)</option>
+              </select>
+              <label>提交摘要</label>
+              <input value={gitSummary} onChange={(e) => setGitSummary(e.target.value)} />
+              <div className="row-buttons">
+                <button onClick={() => onInitGitTeamCollaboration()} disabled={!activeProject || isBusy}>
+                  初始化团队 Git
+                </button>
+                <button onClick={() => onBindGiteaRemote()} disabled={!activeProject || isBusy}>
+                  绑定 Gitea 远程
+                </button>
+                <button onClick={() => onRunGitQuickFlow()} disabled={!activeProject || isBusy}>
+                  一键建分支 + 提交 + 推送
+                </button>
+              </div>
+              <button onClick={() => onRunBackup()} disabled={!activeProject || isBusy}>
+                备份到 GitHub
+              </button>
+              <p className="caption">
+                支持私有 Gitea 远程仓库用于团队协作，同时保留 GitHub 备份用于外部冗余。
+              </p>
             </div>
-            <label>Gitea repo URL</label>
-            <input
-              value={giteaRepoUrl}
-              placeholder="https://gitea.example.com/team/mycodex.git"
-              onChange={(e) => setGiteaRepoUrl(e.target.value)}
-            />
-            <label>Commit message</label>
-            <input value={backupMessage} onChange={(e) => setBackupMessage(e.target.value)} />
-            <label>Branch topic</label>
-            <input value={gitTopic} onChange={(e) => setGitTopic(e.target.value)} />
-            <label>Commit type</label>
-            <select value={gitCommitType} onChange={(e) => setGitCommitType(e.target.value)}>
-              <option value="feat">feat</option>
-              <option value="fix">fix</option>
-              <option value="docs">docs</option>
-              <option value="research">research</option>
-              <option value="chore">chore</option>
-            </select>
-            <label>Commit summary</label>
-            <input value={gitSummary} onChange={(e) => setGitSummary(e.target.value)} />
-            <div className="row-buttons">
-              <button onClick={() => onInitGitTeamCollaboration()} disabled={!activeProject || isBusy}>
-                Init Team Git Flow
-              </button>
-              <button onClick={() => onBindGiteaRemote()} disabled={!activeProject || isBusy}>
-                Bind Gitea Remote
-              </button>
-              <button onClick={() => onRunGitQuickFlow()} disabled={!activeProject || isBusy}>
-                Quick Branch + Commit + Push
-              </button>
-            </div>
-            <button onClick={() => onRunBackup()} disabled={!activeProject || isBusy}>
-              Backup To GitHub
-            </button>
-            <p className="caption">
-              Supports private Gitea remote for team collaboration, while keeping GitHub backup for external redundancy.
-            </p>
-          </div>
+          </details>
         </section>
       </main>
   );

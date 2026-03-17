@@ -218,7 +218,7 @@ export async function deployGitea(payload: {
     };
   }
 
-  const escapedName = appName.replace(/[.*+?^${}()|[\]\]/g, '\$&');
+  const escapedName = appName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const exists = new RegExp('\b' + escapedName + '\b', 'i').test(check.stdout);
 
   if (!exists) {
